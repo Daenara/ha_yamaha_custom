@@ -389,6 +389,8 @@ class YamahaDevice(MediaPlayerEntity):
         """
         if media_type == "NET RADIO":
             self.receiver.net_radio(media_id)
+        elif media_type == "SERVER":
+            self.receiver.server(media_id)
 
     def enable_output(self, port, enabled):
         """Enable or disable an output port.."""
