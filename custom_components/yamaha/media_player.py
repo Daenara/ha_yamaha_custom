@@ -42,11 +42,15 @@ ATTR_SCENE = "scene"
 
 CONF_SOURCE_IGNORE = "source_ignore"
 CONF_SOURCE_NAMES = "source_names"
+CONF_VOLUME_MAX = "volume_max"
+CONF_VOLUME_MIN = "volume_min"
 CONF_ZONE_IGNORE = "zone_ignore"
 CONF_ZONE_NAMES = "zone_names"
 
 DATA_YAMAHA = "yamaha_known_receivers"
 DEFAULT_NAME = "Yamaha Receiver"
+DEFAULT_VOLUME_MAX = 0.0
+DEFAULT_VOLUME_MIN = -100.0
 
 SUPPORT_YAMAHA = (
     SUPPORT_VOLUME_SET
@@ -70,6 +74,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ),
         vol.Optional(CONF_SOURCE_NAMES, default={}): {cv.string: cv.string},
         vol.Optional(CONF_ZONE_NAMES, default={}): {cv.string: cv.string},
+        vol.Optional(CONF_VOLUME_MIN, default=DEFAULT_VOLUME_MIN): float,
+        vol.Optional(CONF_VOLUME_MAX, default=DEFAULT_VOLUME_MAX): float,
     }
 )
 
@@ -86,6 +92,8 @@ class YamahaConfigInfo:
         self.source_names = config.get(CONF_SOURCE_NAMES)
         self.zone_ignore = config.get(CONF_ZONE_IGNORE)
         self.zone_names = config.get(CONF_ZONE_NAMES)
+        self.volume_min = config.get(CONF_VOLUME_MIN)
+        self.volume_max = config.get(CONF_VOLUME_MAX)
         self.from_discovery = False
         if discovery_info is not None:
             self.name = discovery_info.get("name")
@@ -140,6 +148,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             config_info.source_ignore,
             config_info.source_names,
             config_info.zone_names,
+            config_info.volume_min,
+            config_info.volume_max,
         )
 
         # Only add device if it's not already added
@@ -169,11 +179,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class YamahaDevice(MediaPlayerEntity):
     """Representation of a Yamaha device."""
 
-    def __init__(self, name, receiver, source_ignore, source_names, zone_names):
+    def __init__(self, name, receiver, source_ignore, source_names, zone_names, volume_min, volume_max):
         """Initialize the Yamaha Receiver."""
         self.receiver = receiver
         self._muted = False
         self._volume = 0
+        self._volume_min = volume_min
+        self._volume_max = volume_max
         self._pwstate = STATE_OFF
         self._current_source = None
         self._sound_mode = None
@@ -208,7 +220,7 @@ class YamahaDevice(MediaPlayerEntity):
             self._pwstate = STATE_OFF
 
         self._muted = self.receiver.mute
-        self._volume = (self.receiver.volume / 100) + 1
+        self._volume = self._decibel_to_ratio(self.receiver.volume)
 
         if self.source_list is None:
             self.build_source_list()
@@ -315,7 +327,7 @@ class YamahaDevice(MediaPlayerEntity):
         """Set volume level, range 0..1."""
         receiver_vol = 100 - (volume * 100)
         negative_receiver_vol = -receiver_vol
-        self.receiver.volume = negative_receiver_vol
+        self.receiver.volume = self._ratio_to_decibel(volume)
 
     def mute_volume(self, mute):
         """Mute (true) or unmute (false) media player."""
@@ -324,7 +336,7 @@ class YamahaDevice(MediaPlayerEntity):
     def turn_on(self):
         """Turn the media player on."""
         self.receiver.on = True
-        self._volume = (self.receiver.volume / 100) + 1
+        self._volume = self._decibel_to_ratio(self.receiver.volume)
 
     def media_play(self):
         """Send play command."""
@@ -426,3 +438,11 @@ class YamahaDevice(MediaPlayerEntity):
                 return f"{station}: {song}"
 
             return song or station
+
+    def _decibel_to_ratio(self, decibel):
+        """Convert dB linearly to (0..1) scale."""
+        return (decibel - self._volume_min) / (self._volume_max - self._volume_min)
+
+    def _ratio_to_decibel(self, ratio):
+        """Convert (0..1) scale linearly to dB."""
+        return ratio * (self._volume_max - self._volume_min) + self._volume_min
