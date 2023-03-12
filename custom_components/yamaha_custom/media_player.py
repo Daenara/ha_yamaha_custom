@@ -191,7 +191,7 @@ async def async_setup_platform(
 class YamahaDevice(MediaPlayerEntity):
     """Representation of a Yamaha device."""
 
-    def __init__(self, name, receiver, source_ignore, source_names, zone_names, volume_min, volume_max):
+    def __init__(self, name, receiver, source_ignore, source_names, zone_names):
         """Initialize the Yamaha Receiver."""
         self.receiver = receiver
         self._attr_is_volume_muted = False
