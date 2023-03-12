@@ -1,5 +1,5 @@
 {
-  "domain": "yamaha",
+  "domain": "yamaha_custom",
   "name": "Yamaha Network Receivers",
   "documentation": "https://www.home-assistant.io/integrations/yamaha",
   "requirements": ["git+https://github.com/Daenara/rxv.git@patch-1#rxv==0.7.0rc2"],
