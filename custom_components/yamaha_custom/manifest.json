@@ -2,9 +2,11 @@
   "version": "1.1.0",
   "domain": "yamaha_custom",
   "name": "Yamaha Network Receivers",
-  "codeowners": [],
+  "codeowners": ["Daenara"],
   "documentation": "https://www.home-assistant.io/integrations/yamaha",
+  "issue_tracker": "https://github.com/Daenara/ha_yamaha_custom/issues",
   "iot_class": "local_polling",
+  "integration_type": "hub",
   "loggers": ["rxv"],
   "requirements": ["git+https://github.com/Daenara/rxv.git@patch-1#rxv==0.7.0rc2"]
 }
