@@ -3,5 +3,6 @@
   "name": "Yamaha Network Receivers",
   "documentation": "https://www.home-assistant.io/integrations/yamaha",
   "requirements": ["git+https://github.com/Daenara/rxv.git@patch-1#rxv==0.7.0rc2"],
-  "codeowners": []
+  "codeowners": [],
+  "version": "1.0.0"
 }
