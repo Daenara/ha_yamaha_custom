@@ -1,0 +1,5 @@
+{
+  "name": "Yamaha Custom",
+  "render_readme": false,
+  "domains": ["media_player"]
+}
