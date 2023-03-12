@@ -165,7 +165,7 @@ async def async_setup_platform(
             config_info.source_names,
             config_info.zone_names,
             config_info.volume_min,
-            config_info.volume_max,
+            config_info.volume_max
         )
 
         # Only add device if it's not already added
@@ -385,6 +385,10 @@ class YamahaDevice(MediaPlayerEntity):
     def enable_output(self, port, enabled):
         """Enable or disable an output port.."""
         self.receiver.enable_output(port, enabled)
+
+    def menu_cursor(self, cursor):
+        """Press a menu cursor button."""
+        getattr(self.receiver, CURSOR_TYPE_MAP[cursor])()
 
     def set_scene(self, scene):
         """Set the current scene."""
