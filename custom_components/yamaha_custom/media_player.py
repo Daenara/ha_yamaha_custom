@@ -107,7 +107,7 @@ class YamahaConfigInfo:
         self.zone_names = config.get(CONF_ZONE_NAMES)
         self.volume_min = config.get(CONF_VOLUME_MIN)
         self.volume_max = config.get(CONF_VOLUME_MAX)
-        self._attr_unique_id = config.get(CONF_UNIQUE_ID)
+        self.unique_id = config.get(CONF_UNIQUE_ID)
         self.from_discovery = False
         if discovery_info is not None:
             self.name = discovery_info.get("name")
@@ -167,7 +167,8 @@ async def async_setup_platform(
             config_info.source_names,
             config_info.zone_names,
             config_info.volume_min,
-            config_info.volume_max
+            config_info.volume_max,
+            config_info.unique_id
         )
 
         # Only add device if it's not already added
@@ -203,7 +204,7 @@ async def async_setup_platform(
 class YamahaDevice(MediaPlayerEntity):
     """Representation of a Yamaha device."""
 
-    def __init__(self, name, receiver, source_ignore, source_names, zone_names, volume_min, volume_max):
+    def __init__(self, name, receiver, source_ignore, source_names, zone_names, volume_min, volume_max, unique_id):
         """Initialize the Yamaha Receiver."""
         self.receiver = receiver
         self._attr_is_volume_muted = False
@@ -220,11 +221,16 @@ class YamahaDevice(MediaPlayerEntity):
         self._play_status = None
         self._name = name
         self._zone = receiver.zone
-        if self.receiver.serial_number is not None:
-            # Since not all receivers will have a serial number and set a unique id
-            # the default name of the integration may not be changed
-            # to avoid a breaking change.
-            self._attr_unique_id = f"{self.receiver.serial_number}_{self._zone}"
+        if unique_id is not None:
+            self._attr_unique_id = unique_id
+        else:
+            if self.receiver.serial_number is not None:
+                # Since not all receivers will have a serial number and set a unique id
+                # the default name of the integration may not be changed
+                # to avoid a breaking change.
+                self._attr_unique_id = f"{self.receiver.serial_number}_{self._zone}"
+            else:
+                self._attr_unique_id = f"{self.name}_{self._zone}"
 
     def update(self):
         """Get the latest details from the device."""
