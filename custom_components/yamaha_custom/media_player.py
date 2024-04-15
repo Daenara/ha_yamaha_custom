@@ -16,7 +16,7 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
     MediaType,
 )
-from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_UNIQUE_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -85,7 +85,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SOURCE_NAMES, default={}): {cv.string: cv.string},
         vol.Optional(CONF_ZONE_NAMES, default={}): {cv.string: cv.string},
         vol.Optional(CONF_VOLUME_MIN, default=DEFAULT_VOLUME_MIN): float,
-        vol.Optional(CONF_VOLUME_MAX, default=DEFAULT_VOLUME_MAX): float
+        vol.Optional(CONF_VOLUME_MAX, default=DEFAULT_VOLUME_MAX): float,
+        vol.Optional(CONF_UNIQUE_ID): cv.string
     }
 )
 
@@ -106,6 +107,7 @@ class YamahaConfigInfo:
         self.zone_names = config.get(CONF_ZONE_NAMES)
         self.volume_min = config.get(CONF_VOLUME_MIN)
         self.volume_max = config.get(CONF_VOLUME_MAX)
+        self._attr_unique_id = config.get(CONF_UNIQUE_ID)
         self.from_discovery = False
         if discovery_info is not None:
             self.name = discovery_info.get("name")
